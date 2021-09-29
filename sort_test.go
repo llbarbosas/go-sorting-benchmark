@@ -7,58 +7,79 @@ import (
 	main "github.com/llbarbosas/go-sorting-benchmark"
 )
 
-var rand = main.MakeRandSource(999)
+var (
+	rand = main.MakeRandSource(999)
+)
 
-func testSortingFunc(sortFunc func([]int)) bool {
-	arr := []int{4, 5, 2, 1, 3}
-	expected := []int{1, 2, 3, 4, 5}
+func BenchmarkBubbleSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.BubbleSort, b)
+}
 
-	sortFunc(arr)
+func BenchmarkSelectionSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.SelectionSort, b)
+}
 
-	return reflect.DeepEqual(arr, expected)
+func BenchmarkShellSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.ShellSort, b)
+}
+
+func BenchmarkMergeSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.MergeSort, b)
+}
+
+func BenchmarkQuickSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.QuickSort, b)
+}
+
+func BenchmarkRadixSort(b *testing.B) {
+	benchmarkSortingFunc(10, main.RadixSort, b)
 }
 
 func TestBubbleSort(t *testing.T) {
-	if !testSortingFunc(main.BubbleSort) {
-		t.Fatal("BubbleSort not sorted sucessfully")
-	}
-}
-
-func BenchmarkBubbleSort(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		b.StopTimer()
-		s := main.GenerateSingleA(10, rand)
-		b.StartTimer()
-		main.BubbleSort(s)
-	}
+	testSortingFunc(main.BubbleSort, t)
 }
 
 func TestSelectionSort(t *testing.T) {
-	if !testSortingFunc(main.SelectionSort) {
-		t.Fatal("SelectionSort not sorted sucessfully")
-	}
+	testSortingFunc(main.SelectionSort, t)
 }
 
 func TestShellSort(t *testing.T) {
-	if !testSortingFunc(main.ShellSort) {
-		t.Fatal("ShellSort not sorted sucessfully")
-	}
+	testSortingFunc(main.ShellSort, t)
 }
 
 func TestMergeSort(t *testing.T) {
-	if !testSortingFunc(main.MergeSort) {
-		t.Fatal("MergeSort not sorted sucessfully")
-	}
+	testSortingFunc(main.MergeSort, t)
 }
 
 func TestQuickSort(t *testing.T) {
-	if !testSortingFunc(main.QuickSort) {
-		t.Fatal("QuickSort not sorted sucessfully")
-	}
+	testSortingFunc(main.QuickSort, t)
 }
 
 func TestRadixSort(t *testing.T) {
-	if !testSortingFunc(main.RadixSort) {
-		t.Fatal("RadixSort not sorted sucessfully")
+	testSortingFunc(main.RadixSort, t)
+}
+
+func benchmarkSortingFunc(n int, fn main.SortingFunc, b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		b.StopTimer()
+		s := main.GenerateSingleA(n, rand)
+		b.StartTimer()
+		fn(s)
+	}
+}
+
+func testSortingFunc(fn func([]int), t *testing.T) {
+	arr := []int{4, 5, 2, 1, 3}
+	expected := []int{1, 2, 3, 4, 5}
+
+	fn(arr)
+
+	if isEqual := reflect.DeepEqual(arr, expected); !isEqual {
+		fnName := main.GetFunctionName(fn)
+
+		t.Fatalf(
+			"%s didn't order data sucessfully\nExpected: %v, got: %v",
+			fnName, expected, arr,
+		)
 	}
 }

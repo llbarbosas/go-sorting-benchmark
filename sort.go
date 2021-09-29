@@ -1,5 +1,48 @@
 package main
 
+import "math/rand"
+
+type SortingFunc func([]int)
+type AGenerationConfig struct {
+	Seed int64
+	Inc  int
+	Max  int
+	Stp  int
+}
+
+func (cfg AGenerationConfig) ANum() int {
+	return ((cfg.Max - cfg.Inc) / cfg.Stp) + 1
+}
+
+func (cfg AGenerationConfig) Rand() rand.Rand {
+	return MakeRandSource(cfg.Seed)
+}
+
+func MakeRandSource(seed int64) rand.Rand {
+	source := rand.NewSource(seed)
+	return *rand.New(source)
+}
+
+func GenerateASet(cfg AGenerationConfig) [][]int {
+	aSet := make([][]int, cfg.ANum())
+
+	for n, i := cfg.Inc, 0; n <= cfg.Max; n, i = n+cfg.Stp, i+1 {
+		aSet[i] = GenerateSingleA(n, cfg.Rand())
+	}
+
+	return aSet
+}
+
+func GenerateSingleA(n int, rand rand.Rand) []int {
+	a := make([]int, n)
+
+	for i := 0; i < n; i++ {
+		a[i] = rand.Int()
+	}
+
+	return a
+}
+
 func BubbleSort(a []int) {
 	for i := 0; i < len(a); i++ {
 		for j := 1; j < len(a)-i; j++ {
