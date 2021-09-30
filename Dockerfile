@@ -11,7 +11,4 @@ RUN go mod download
 
 COPY * ./
 
-RUN make generate-results
-RUN make generate-graph
-
-CMD ["cat", "out/results.csv"]
+CMD make generate-results && make generate-graph
